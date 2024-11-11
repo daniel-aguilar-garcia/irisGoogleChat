@@ -133,12 +133,21 @@ ClassMethod GetModPromptChannel(mod As %String)
     Q $G(^ModsGoogleChat(mod))
 }
 
+ClassMethod SetupGoogleChat(url As %String, apiKey As %String, orgId As %String)
+{
+    Set ^GoogleChat("url")=url
+    Set ^GoogleChat("apiKey")=apiKey
+    Set ^GoogleChat("orgId")=orgId
+}
+
 ClassMethod AskChatGPT(message As %String) As %String
 {
-     Set url = "https://api.openai.com/v1/chat/completions"
+     Set url = $G(^GoogleChat("url"))
 
-     Set apiKey = "Your_Chat_Gpt_Api_key"
-     Set orgId = "Your_Chat_Gpt_org_id"
+     //Set apiKey = "Your_Chat_Gpt_Api_key"
+     Set apiKey = $G(^GoogleChat("apiKey"))
+     //Set orgId = "Your_Chat_Gpt_org_id"
+     Set orgId = $G(^GoogleChat("orgId"))
 
      Set request = ##class(%Net.HttpRequest).%New()
      Set request.Server = "api.openai.com"
@@ -151,26 +160,26 @@ ClassMethod AskChatGPT(message As %String) As %String
      Do request.SetHeader("OpenAI-Organization", orgId)
 
      Set requestBody = {}
-     Set requestBody.model = "gpt-4o-mini"
+     Set requestBody.model = "gpt-4o"
      Set requestMessages = []
      Set requestMessage = {}
      Set requestMessage.role = "user"
-     Set requestMessage.question = message
+     Set requestMessage.content = message
      Do requestMessages.%Push(requestMessage)
      Set requestBody.messages = requestMessages
-     Set requestMessage.temperatre = 0.7
+     Set requestMessage.temperatre = 1
 
      Set requestBodyJSON = requestBody.%ToJSON()
      Do request.EntityBody.Write(requestBodyJSON)
 
      Set sc = request.Post(url)
-
+     
      // Manejar la respuesta
      Quit:sc'=1 ""
      
      Set responseObject = ##class(%DynamicAbstractObject).%FromJSON(request.HttpResponse.Data.Read())
     
-     Set chatResponse = responseObject.choices.GetAt(1).message.content
+     Set chatResponse = responseObject.choices.%Get(0).message.content
 
      Quit chatResponse
 }

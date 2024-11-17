@@ -1,4 +1,6 @@
-ARG IMAGE=intersystems/iris-ml-community:2023.1.0.235.0
+# use the commented ARG for old computers 
+# ARG IMAGE=intersystems/iris-ml-community:2023.1.0.235.0 
+ARG IMAGE=intersystemsdc/iris-ml-community
 FROM $IMAGE
 
 USER root   
